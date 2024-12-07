@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drink Leaderboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        .leaderboard {
+            margin: 20px auto;
+            max-width: 800px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .leaderboard th, .leaderboard td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .leaderboard th {
+            background-color: #007bff;
+            color: white;
+        }
+        .leaderboard tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .leaderboard tr:hover {
+            background-color: #ddd;
+        }
+        .link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Drink Leaderboard</h1>
+    <table class="leaderboard">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Brand</th>
+                <th>Name</th>
+                <th>Country</th>
+                <th>Price per Liter Alcohol (SEK)</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+    <script>
+        async function fetchLeaderboard() {
+            try {
+                const response = await fetch('http://localhost:3000/leaderboard');
+                const data = await response.json();
+
+                const tableBody = document.getElementById('leaderboard-body');
+                tableBody.innerHTML = ''; // Clear existing content
+
+                data.forEach((drink, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${drink.brand}</td>
+                        <td>${drink.name}</td>
+                        <td>${drink.country}</td>
+                        <td>${drink.price_per_liter_alcohol.toFixed(2)} SEK</td>
+                        <td><a href="${drink.url}" class="link" target="_blank">View</a></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+            }
+        }
+
+        // Fetch leaderboard on page load
+        window.onload = fetchLeaderboard;
+    </script>
+</body>
+</html>
