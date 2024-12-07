@@ -176,10 +176,18 @@ async function webscrapeIndividualDrinks(url, browser) {
       
       const parseNumber = (text, regex) => {
         if (!text) return 0;
-        const cleanedText = text.replace(/[^\d,.-]/g, '').replace(/\s+/g, '').replace(',', '.');
-        const match = cleanedText.match(regex);
-        return match ? parseFloat(match[0]) : 0;
+        const cleanedText = text.replace(/[^\d.,:]/g, '') // Remove all non-numeric characters and colons
+        const normalizedText = cleanedText.replace(/[,:]/g, '.'); // Replace `,` with `.`
+        const match = normalizedText.match(regex); // Match the number pattern
+        return match ? shortenDecimals(parseFloat(match[0]), 2) : 0; // Return as float or 0 if no match
       };
+
+      // Shortens the decimals of a number to the wanted amount
+      // Example: (1000.1237, 3) => 1000.124
+      const shortenDecimals = (num, decimals) => {
+        const multiplier = Math.pow(10, decimals); // Calculate 10^decimals
+        return Math.round(num * multiplier) / multiplier; // Adjust precision and divide back
+      }
 
       const getChildFromDiv = (parentQuery, childQuery) => {
         const parentDiv = document.querySelector(parentQuery); // Find the parent
@@ -190,9 +198,9 @@ async function webscrapeIndividualDrinks(url, browser) {
         return null;
       };
 
-      const country = getAttribute('.css-r9u0bx', 'name'); // Country of origin
-      const brand = getText('h1.css-1uk1gs8 p.css-m7kuem'); // First <p> in <h1> for the brand
-      const name = getText('h1.css-1uk1gs8 p.css-1mvo2ni');
+      const country = getAttribute('.css-r9u0bx', 'name') || 'Unknown'; // Country of origin
+      const brand = getText('h1.css-1uk1gs8 p.css-m7kuem') || 'Unknown'; // First <p> in <h1> for the brand
+      const name = getText('h1.css-1uk1gs8 p.css-1mvo2ni') || 'Unknown';
       const type = getText('.css-3pl8w3.eqfj59s0'); // This will get the text of the first <a> tag (Öl)
       const subType = getText('.css-3pl8w3.eqfj59s0:nth-child(2)'); // This will get the text of the second <a> tag (Ljus lager)
       const description = getChildFromDiv('.css-1ixxwv1', '.css-173act9') || 'No description available.';
@@ -200,14 +208,14 @@ async function webscrapeIndividualDrinks(url, browser) {
       const priceText = getText('.css-ylm6mu'); // Price text (e.g., "77:-")
       const price = parseNumber(priceText, /\d+([,\.]\d+)?/); // Extract numeric price
       const pricePerLiterText = getText('.css-d2oo9m p:last-child'); // Price per liter text (e.g., "102:67 kr/l")
-      const pricePerLiter = Math.round(parseNumber(pricePerLiterText, /\d+([,\.]\d+)?/) * 100) / 100; // Extract numeric price per liter
+      const pricePerLiter = parseNumber(pricePerLiterText, /\d+([,\.]\d+)?/) // Extract numeric price per liter
 
-      const amount = Math.round(price / pricePerLiter * 100) / 100;
+      const amount = shortenDecimals(price / pricePerLiter, 2)
 
       const alcoholText = getText('p.css-1sy82wm.e1o91dat0:last-child'); // Alcohol content text (e.g., "13 % vol.")
       const alcoholPercent = parseNumber(alcoholText, /\d+([,\.]\d+)?/); // Extract alcohol percentage
-      const pricePerLiterAlcohol = price / (amount * (alcoholPercent/100))
-      const pricePerPercent = Math.round(pricePerLiter / alcoholPercent * 100) / 100;
+      const pricePerLiterAlcohol = shortenDecimals(price / (amount * (alcoholPercent/100)), 2)
+      const pricePerPercent = shortenDecimals(pricePerLiter / alcoholPercent, 2)
     
 
       return {

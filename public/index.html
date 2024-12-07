@@ -52,7 +52,9 @@
                 <th>Brand</th>
                 <th>Name</th>
                 <th>Country</th>
-                <th>Price per Liter Alcohol (SEK)</th>
+                <th>Price per liter of alcohol (SEK)</th>
+                <th>Price</th>
+                <th>Size</th>
                 <th>Link</th>
             </tr>
         </thead>
@@ -77,7 +79,9 @@
                         <td>${drink.name}</td>
                         <td>${drink.country}</td>
                         <td>${drink.price_per_liter_alcohol.toFixed(2)} SEK</td>
-                        <td><a href="${drink.url}" class="link" target="_blank">View</a></td>
+                        <td>${drink.price} SEK</td>
+                        <td>${drink.amount}ml</td>
+                        <td><a href="https://www.systembolaget.se${drink.url}" class="link" target="_blank">View</a></td>
                     `;
                     tableBody.appendChild(row);
                 });

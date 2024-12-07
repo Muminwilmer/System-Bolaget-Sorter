@@ -2,9 +2,14 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = 3000;
+const path = require('path')
 
 // Connect to SQLite database
 const db = new sqlite3.Database('./sql/bolaget.db');
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public', 'index.html'))
+})
 
 // API endpoint to get top 100 drinks sorted by pricePerLiterAlcohol
 app.get('/leaderboard', (req, res) => {
