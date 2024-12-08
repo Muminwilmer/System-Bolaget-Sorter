@@ -84,7 +84,7 @@
     <script>
         async function fetchLeaderboard() {
             try {
-                const response = await fetch('http://localhost:3000/leaderboard'+"?choice=price_per_percent&skipNoAlc=true", {
+                const response = await fetch('/leaderboard'+"?choice=price_per_percent&skipNoAlc=true", {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json' // Ensure the server knows you're sending JSON
