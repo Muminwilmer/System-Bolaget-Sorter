@@ -101,7 +101,8 @@ async function webscrapeMainpage() {
             alcohol_percent = ?, 
             price_per_liter = ?, 
             price_per_percent = ?,
-            price_per_liter_alcohol = ?
+            price_per_liter_alcohol = ?,
+            food_recommendations = ?
           WHERE url = ?
         `, [
           product.country || null,
@@ -116,6 +117,7 @@ async function webscrapeMainpage() {
           product.pricePerLiter || null,
           product.pricePerPercent || null,
           product.pricePerLiterAlcohol || null,
+          product.foodRecommendations || null,
           url
         ], (err) => {
           if (err) {
@@ -127,8 +129,8 @@ async function webscrapeMainpage() {
       } else {
         // If the product doesn't exist, insert a new record
         db.run(`
-          INSERT INTO products (url, country, brand, name, type, sub_type, description, price, amount, alcohol_percent, price_per_liter, price_per_percent, price_per_liter_alcohol)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO products (url, country, brand, name, type, sub_type, description, price, amount, alcohol_percent, price_per_liter, price_per_percent, price_per_liter_alcohol, food_recommendations)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           url,
           product.country || null,
@@ -142,7 +144,8 @@ async function webscrapeMainpage() {
           product.alcoholPercent || null,
           product.pricePerLiter || null,
           product.pricePerPercent || null,
-          product.pricePerLiterAlcohol || null
+          product.pricePerLiterAlcohol || null,
+          product.foodRecommendations || null
         ], (err) => {
           if (err) {
             console.error('Error inserting product:', err.message);
@@ -198,6 +201,18 @@ async function webscrapeIndividualDrinks(url, browser) {
         return null;
       };
 
+      const getRecommendations = () => {
+        const recommendations = [];
+        const recommendationElements = document.querySelectorAll('.css-1wvgcb3'); // Change this selector based on actual structure
+        recommendationElements.forEach((item) => {
+          const recommendation = item.innerText.trim();
+          if (recommendation && !recommendations.includes(recommendation)) {
+            recommendations.push(recommendation); // Avoid duplicates
+          }
+        });
+        return recommendations;
+      };
+
       const country = getAttribute('.css-r9u0bx', 'name') || 'Unknown'; // Country of origin
       const brand = getText('h1.css-1uk1gs8 p.css-m7kuem') || 'Unknown'; // First <p> in <h1> for the brand
       const name = getText('h1.css-1uk1gs8 p.css-1mvo2ni') || 'Unknown';
@@ -217,6 +232,7 @@ async function webscrapeIndividualDrinks(url, browser) {
       const pricePerLiterAlcohol = shortenDecimals(price / (amount * (alcoholPercent/100)), 2)
       const pricePerPercent = shortenDecimals(pricePerLiter / alcoholPercent, 2)
     
+      const foodRecommendations = getRecommendations();
 
       return {
         name,
@@ -230,7 +246,8 @@ async function webscrapeIndividualDrinks(url, browser) {
         pricePerLiterAlcohol,
         pricePerPercent,
         type,
-        description
+        description,
+        foodRecommendations
       };
     });
 
