@@ -8,6 +8,6 @@ Alkoholkollen hjälper dig att jämföra produkter från Systembolaget och hitta
 
 ## Besök sidan  
 
-👉 [Gå till Alkoholkollen](https://example.com/KOMMER-SNART)  
+👉 [Gå till Alkoholkollen](system-bolaget-sorter.vercel.app)  
 
 ---
